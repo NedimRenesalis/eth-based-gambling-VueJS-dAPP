@@ -52,3 +52,7 @@ function bet(uint _number) payable public {
    emit Won(false, 0);
  }
 }
+
+function checkContractBalance() Owned public view returns(uint) {
+  return address(this).balance
+ }
