@@ -40,3 +40,15 @@ function() public { //fallback
  }
 }
 
+function bet(uint _number) payable public {
+ require(_number > 0 && _number <= 10);
+ require(msg.value >= minBet);
+ uint winningNumber = block.number % 10 + 1;
+ if (_number == winningNumber) {
+   uint amountWon = msg.value * (100 — houseEdge)/10;
+   if(!msg.sender.send(amountWon)) revert();
+   emit Won(true, amountWon);
+ } else {
+   emit Won(false, 0);
+ }
+}
