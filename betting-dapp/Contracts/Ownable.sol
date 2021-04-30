@@ -1,14 +1,12 @@
-pragma solidity ^0.5.1;
+pragma solidity ^0.5.0;
 
 contract Ownable {
   address payable owner;
-
-  constructor () public {
-  //Set owner to who creates the contract
-  owner = msg.sender;
+  // set the state variable ‘owner’ to the address of the creator.
+  constructor() public {
+    owner = msg.sender;
   }
 
-  //Access modifier
   modifier Owned {
     require(msg.sender == owner);
     _;
@@ -16,7 +14,7 @@ contract Ownable {
 }
 
 contract Mortal is Ownable {
-  //Our access modifier is present, only the contract creator can      use this function
+  // allows the contract owner (access modifier) to destroy the contract and send the remaining funds back to him.
   function kill() public Owned {
     selfdestruct(owner);
   }
@@ -26,23 +24,23 @@ contract Casino is Mortal{
   uint minBet;
   uint houseEdge; //in %
 
-  //true+amount or false+0
   event Won(bool _status, uint _amount);
 
+  // make our constructor payable so we can preload our contract with some Ether on deployment. 
   constructor(uint _minBet, uint _houseEdge) payable public {
     require(_minBet > 0);
     require(_houseEdge <= 100);
     minBet = _minBet;
     houseEdge = _houseEdge;
   }
-
+  
   function() external { //fallback
     revert();
   }
 
   function bet(uint _number) payable public {
-    require(_number > 0 && _number <= 10, "Bet must be between 1 and 10");
-    require(msg.value >= minBet, "Bet must be bigger than minimum Bet");
+    require(_number > 0 && _number <= 10);
+    require(msg.value >= minBet);
     uint winningNumber = block.number % 10 + 1;
     if (_number == winningNumber) {
       uint amountWon = msg.value * (100 - houseEdge)/10;
@@ -52,13 +50,8 @@ contract Casino is Mortal{
       emit Won(false, 0);
     }
   }
-
+  
   function checkContractBalance() Owned public view returns(uint) {
-    return address(this).balance;
- }
-
-  function checkMinBet() Owned public view returns(uint) {
-    return minBet;
- }
+      return address(this).balance;
+  }
 }
-
